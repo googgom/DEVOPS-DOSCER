@@ -1,0 +1,31 @@
+  version: "3.8"
+
+  services:
+    db:
+      image: postgres:13-alpine
+      environment:
+        POSTGRES_DB: vernuu
+        POSTGRES_USER: vernuu
+        POSTGRES_PASSWORD: vernuu
+      volumes:
+        - db_data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U vernuu -d vernuu"]
+        interval: 10s
+        retries: 5
+
+    app:
+      build: .
+      ports:
+        - "3456:3456"
+      environment:
+        - PORT=3456
+        - DATABASE_URL=postgres://vernuu:vernuu@db:5432/vernuu
+      volumes:
+        - .:/app
+      depends_on:
+        db:
+          condition: service_healthy
+
+  volumes:
+    db_data:
